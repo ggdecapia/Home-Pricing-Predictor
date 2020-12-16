@@ -1,0 +1,286 @@
+<DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Home Pricing Predictor</title>
+
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+
+    <!-- Import the Plotly library. Note that this has to 
+        happen before we import any code that uses Plotly. -->
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+
+    <!-- Import the D3 library. Note that this has to happen 
+    before we import any code that uses D3. -->
+    <!-- <script src="https://d3js.org/d3.v5.min.js"></script>
+    <script src="https://d3js.org/queue.v1.min.js"></script>
+    <script src="https://d3js.org/topojson.v0.min.js"></script> -->
+
+    <!-- D3 JavaScript
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.2.3/d3.min.js"></script>
+    <script type="text/javascript" src="https://d3js.org/d3.v5.min.js"></script>
+    <script type="text/javascript" src="https://d3js.org/queue.v1.min.js"></script>
+    <script type="text/javascript" src="https://d3js.org/topojson.v0.min.js"></script>
+    <script type="text/javascript" src="https://d3js.org/d3-queue.v3.min.js"></script>
+    <script type="text/javascript" src="https://d3js.org/d3-array.v2.min.js"></script>
+    <script type="text/javascript" src="https://d3js.org/d3-geo.v2.min.js"></script>
+    <-------------------->
+
+    <script src="http://www.webglearth.com/v2/api.js"></script> 
+
+
+    <!-- Import some CSS, just to show how it's done. -->
+    <!-- Added for bootstrap components -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <!-- Added for Leaflet -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css" integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ==" crossorigin="">
+    <!-- Added for Javalib -->
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    
+    <script src="http://d3js.org/topojson.v3.min.js"></script>
+    <script src="https://d3js.org/d3-queue.v3.min.js"></script>
+    
+    <!-- Our CSS -->
+    <link rel="stylesheet" type="text/css" href="../static/css/style.css">
+</head>
+
+<!--<body style="background-color: #0b5711;" >-->
+<body>
+  <div class="wrapper">
+
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12 jumbotron text-center" style="background-color: #0b5711;" id="jumbotron" >
+            <!-- <div style="background:transparent !important"> -->
+                
+                <h1> Home Pricing Prediction Model</h1>
+            
+            </div>
+        </div>
+    </div>
+
+    <nav class="navbar navbar-expand-lg navbar-light bg-dark">
+        <a class="navbar-brand" href="#"><h1>King County Homes</h1></a>
+        <button class="navbar-toggler" type="button" data-toggle="collapsse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+    
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item active">
+                    <a class="nav-link" href="#"><span class="sr-only">(current)</span></a>
+                </li>
+            </ul>
+            <ul class="navbar-nav">
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle current_mode user-selection" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Models
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="navbarDropdown" id="Presentation_Mode">
+                        <li class="dropdown-item" onclick="handleModeChange('home')" href="#">Home</li>
+                        <li class="dropdown-item" onclick="handleModeChange('NN')" href="#">Neural Network</li>
+                        <li class="dropdown-item" onclick="handleModeChange('MLR')" href="#">Multi-Linear Regression</li>
+                        <!-- <li class="dropdown-item" onclick="handleModeChange('table')" href="#">Table</li>
+                        <li class="dropdown-item" onclick="handleModeChange('javaLib')" href="#">Bar Chart</li>
+                        <li class="dropdown-item disabled" onclick="handleModeChange('FIXME')"href="">Data</li> -->
+                    </ul>
+                </li>
+            </ul>
+            <form class="form-inline my-2 my-lg-0">
+                <a class="nav-link" href="">About <span class="sr-only">(current)</span></a>
+            </form>
+
+        </div>
+    </nav>
+    
+    <div class="container-fluid">
+        <div class="row">
+
+            <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
+                <div class="sidebar-sticky pt-3">
+                    <!-- <h4>Search</h4> -->
+                    <button id="search-btn1" type="button" class="btn btn-success btn-lg">Calculate</button>
+                    <ul class="list-group" id="filters">
+                        <li class="filter list-group-item">
+                            <label for="year">Year Built</label>
+                            <input class="form-control" id="yearform" value="1985" placeholder="Provide a year built"></select>
+                        </li>
+                        <li class="filter list-group-item">
+                            <label for="livingsquarefootage">Living Space (sqft)</label>
+                            <input class="form-control" id="sqftlivingform" value="2000" placeholder="Provide a latitude"></select>
+                        
+                            <label for="floors">Floors</label>
+                            <input class="form-control" id="floorsform" value="1" placeholder="Number of floors"></select>
+                        
+                            <label for="abovesquarefootage">Above Ground (sqft)</label>
+                            <input class="form-control" id="sqftaboveform" value="1600" placeholder="(sqft)"></select>
+                        
+                            <label for="basementsquarefootage">Basement (sqft)</label>
+                            <input class="form-control" id="sqftbasementform" value="400" placeholder="(sqft)"></select>
+                        
+                            <label for="lotsquarefootage">Lot Area (sqft)</label>
+                            <input class="form-control" id="sqftlotform" value="5000" placeholder="(sqft)"></select>
+                        </li>
+                        <li class="filter list-group-item">
+                            <label for="bedrooms">Bedrooms</label>
+                            <input class="form-control" id="bedroomsform" value="3" placeholder="Number of bedrooms"></select>
+                        </li>
+                        <li class="filter list-group-item">
+                            <label for="bathrooms">Bathrooms</label>
+                            <input class="form-control" id="bathroomsform" value="2" placeholder="Number of bathrooms"></select>
+                        </li>
+                        <li class="filter list-group-item">
+                            <label for="condition">Condition</label>
+                            <select class="form-control" id="conditionform" value="7" placeholder="Condition (1-5)">
+                                <option>5</option>
+                                <option>4</option>
+                                <option selected="selected">3</option>
+                                <option>2</option>
+                                <option>1</option>
+                            </select>
+                        </li>
+                        <li class="filter list-group-item">
+                            <label for="grade">Grade</label>
+                            <select class="form-control" id="gradeform" value="3" placeholder="Grade (1-13)">
+                                <option>13</option>
+                                <option>12</option>
+                                <option>11</option>
+                                <option>10</option>
+                                <option>9</option>
+                                <option>8</option>
+                                <option selected="selected">7</option>
+                                <option>6</option>
+                                <option>5</option>
+                                <option>4</option>
+                                <option>3</option>
+                                <option>2</option>
+                                <option>1</option>
+                            </select>
+                        </li>
+                        <li class="filter list-group-item">
+                            <label for="latitude">Latitude</label>
+                            <input class="form-control" id="latitudeform" value="47.5112" placeholder="Provide a latitude"></select>
+                            <label for="longitude">Longitude</label>
+                            <input class="form-control" id="longitudeform" value="-122.257" placeholder="Provide a longitude"></select>
+                        </li>
+                    </ul>
+                </div>
+                <br>
+                <!--ggd-->
+                <button id="search-btn2" type="button" class="btn btn-success btn-lg">Calculate</button>
+            </nav>
+
+
+            <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4"  style="background-color: #F3F3F3;">
+
+            <div class="boxed">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h2 class="h2" id="displayTitle" style="color: #023d29"></h2>
+                    <div class="btn-toolbar mb-2 mb-md-0">
+                        <!-- <div class="btn-group mr-2">
+                          <button type="button" class="btn btn-sm btn-outline-secondary">Download</button>
+                          <button type="button" class="btn btn-sm btn-outline-secondary">Print</button>
+                          &nbsp;
+                        </div> -->
+                    </div>
+                </div>
+
+                <div id="Data_Presentation_Summary">
+                </div>
+
+                <div id="Data_Presentation_Window">
+                    <!-- <h6 class="par" id="displayTitle">
+                    </h6> -->
+                    <!--ggd-->
+                    
+                    <p> Please use the search bar on the left to select the features of the house you are interested in. Use the dropdown menu above to change the price prediction model.</p>
+                                        
+                    <h6>BUILDING CONDITION</h6>
+                    <p>Relative to age and grade. Coded 1-5.</p>
+                    <ul>
+                        <li>5 = Very Good - All items well maintained, many having been overhauled and repaired as they have shown signs of wear, increasing the life expectancy and lowering the effective age with little deterioration or obsolescence evident with a high degree of utility.</li>
+                        <li>4 = Good - No obvious maintenance required but neither is everything new. Appearance and utility are above the standard and the overall effective age will be lower than the typical property.</li>
+                        <li>3 = Average - Some evidence of deferred maintenance and normal obsolescence with age in that a few minor repairs are needed, along with some refinishing. All major components still functional and contributing toward an extended life expectancy. Effective age and utility is standard for like properties of its class and usage.</li>
+                        <li>2 = Fair - Badly worn. Much repair needed. Many items need refinishing or overhauling, deferred maintenance obvious, inadequate building utility and systems all shortening the life expectancy and increasing the effective age.</li>
+                        <li>1 = Poor - Worn out. Repair and overhaul needed on painted surfaces, roofing, plumbing, heating and numerous functional inadequacies. Excessive deferred maintenance and abuse, limited value-in-use, approaching abandonment or major reconstruction; reuse or change in occupancy is imminent. Effective age is near the end of the scale regardless of the actual chronological age.</li>
+                    </ul>
+                    <br>
+                    <h6>BUILDING GRADE</h6>
+                    <p>Represents the construction quality of improvements. Grades run from grade 1 to 13. Generally defined as:</p>
+                    <ul>
+                        <li>13  = Generally custom designed and built. Mansion level. Large amount of highest quality cabinet work, wood trim, marble, entry ways etc.</li>
+                        <li>12  = Custom design and excellent builders. All materials are of the highest quality and all conveniences are present.</li>
+                        <li>11  = Custom design and higher quality finish work with added amenities of solid woods, bathroom fixtures and more luxurious options.</li>
+                        <li>9	= Better architectural design with extra interior and exterior design and quality.</li>
+                        <li>8	= Just above average in construction and design. Usually better materials in both the exterior and interior finish work.</li>
+                        <li>7	= Average grade of construction and design. Commonly seen in plats and older sub-divisions.</li>
+                        <li>6	= Lowest grade currently meeting building code. Low quality materials and simple designs.</li>
+                        <li>5	= Low construction costs and workmanship. Small, simple design.</li>
+                        <li>4	= Generally older, low quality construction. Does not meet code.</li>
+                        <li>1-3 = Falls short of minimum building standards. Normally cabin or inferior structure.</li>
+                    </ul>
+                    <br>
+                    <p> Project by Chris Sadlo, Glenda Decapia, Katrice Trahan, and Sarah Kachelmeier</p>
+                    <br>
+                    <!--<img src="static/images/house.png" alt="Clipart of House">-->
+                </div>
+
+            </main>
+            </div>
+            </div>
+        </div>
+            
+    </div>
+  </div>
+ 
+
+    <!-- D3 JavaScript -->
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.2.3/d3.min.js"></script>
+    <script type="text/javascript" src="https://d3js.org/d3.v5.min.js"></script>
+
+    <!-- ADDED -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+    
+    <!-- ADDED for LEAFLET-->
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js" integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew==" crossorigin=""></script>
+
+    <!-- Import the main JavaScript code. -->
+    <script type="text/javascript" src="static/js/main.js"></script>
+
+
+    <img id="dom_image" style="display: none" src="../static/images/dom_gandalf_composite2.jpg">
+
+    <div class="form-group col-lg-3">
+        <label for="InputPassword"></label>
+        <input type="password" class="form-control" style="display: block;" onchange="equals()" id="InputPassword1" placeholder="Speak Friend and Enter.">
+    </div>
+
+    <script type="text/javascript">
+        var firstField = document.getElementById('InputPassword1');
+        var image =    document.getElementById('dom_image');
+    
+        function equals() {
+            console.log("Password is ", firstField.value);
+            if(firstField.value == "Mellon" || firstField.value == "mellon") {
+                image.style.display = 'block';
+                //image2.style.display = 'none';
+            }
+            else {
+                image.style.display = 'none';
+                //image2.style.display = 'block';
+            }
+        }
+        firstField.onkeyup = equals;
+    </script>
+
+
+</body>
+
+</html>

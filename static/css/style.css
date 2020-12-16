@@ -1,0 +1,100 @@
+h1 { color: rgb(246, 246, 250); }
+h3 { color: red; }
+
+body,
+html {
+    height: 100%;
+}
+
+#Data_Presentation_Window {
+    height: 800px;
+}
+
+.predicted-value {
+  color: rgb(0, 255, 42);
+  color: rgb(4, 99, 21);
+  font-size: 32px;
+}
+
+.user-selection{
+  color: rgb(168, 245, 181) !important;
+  font-size: 16px !important;
+}
+
+.dropdown-item{
+  color: rgb(4, 99, 21);
+  font-size: 16px;
+}
+
+body {
+  background-image: url("../images/header-bkgrnd.png");
+  background-repeat: repeat-x;
+  z-index: 0;
+}
+* {
+    box-sizing: border-box;
+    font-family: Ubuntu, italic;
+    color: rgb(15, 15, 27)
+  }
+  
+  .hero {
+    position: relative;
+    height: 650px;
+    padding: 25px;
+    margin: 0;
+    background: rgb(54, 62, 107);
+    background-image: url("../images/katrina.jpg");
+    background-attachment: fixed;
+    background-position: top right;
+    background-size: cover;
+  }
+
+  .hero h1 {
+    color: white;
+  }
+  
+  .hero .quote {
+    color: white;
+    font-size: large;
+  }
+    #table-area tbody td {
+      display: block;
+      text-align: center;
+    }
+    #table-area tbody td::before {
+      display: block;
+      font-size: 1.4em;
+      font-weight: bold;
+      text-align: center;
+      content: attr(data-th);
+    }
+    .hero h1 {
+      animation: smaller-title 1.2s forwards linear;
+    }
+  /* keyframe animations which will be used to animate the title */
+  @keyframes title {
+    from {
+      opacity: 0;
+    }
+    to {
+      font-size: 7.5rem;
+      opacity: 1;
+    }
+  }
+  @keyframes smaller-title {
+    from {
+      opacity: 0;
+    }
+    to {
+      font-size: 5.5rem;
+      opacity: 1;
+    }
+  }
+  @keyframes subtitle {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
